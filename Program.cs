@@ -1,27 +1,44 @@
 ﻿using RLNET;
+using RogueLike.Core;
 
 namespace RogueLike
 {
     class Program
     {
-        static readonly int _gameWidth = 180;
-        static readonly int _gameHeight = 120;
+        //Root console
+        static readonly int _screenWidth = 80;
+        static readonly int _screenHeight = 60;
         static RLRootConsole _rootConsole;
+
+        //Map console
+        static readonly int _mapPositionX = 0;
+        static readonly int _mapPositionY = 0;
+        static readonly int _mapWidth = 80;
+        static readonly int _mapHeight = 60;
+        static RLConsole _mapConsole;
+
+        //Dungeon
+        public static DungeonMap DungeonMap { get; private set; }
+        //Player
 
         static void Main(string[] args)
         {
             //Setup window settings
-            RLSettings settings = new RLSettings();
+            string bitmapFile = "terminal16x16.png";
+            int charHeight = 16;
+            int charWidth = 16;
+            int width = _screenWidth;
+            int height = _screenHeight;
+            string title = "RogueLike";
 
-            settings.BitmapFile = "terminal16x16.png";
-            settings.CharHeight = 16;
-            settings.CharWidth = 16;
-            settings.Width = _gameWidth;
-            settings.Height = _gameHeight;
-            settings.Title = "RogueLike";
-            //settings.StartWindowState
+            //Create window
+            _rootConsole = new RLRootConsole(bitmapFile, width, height, charWidth, charHeight, 1f, title);
 
-            _rootConsole = new RLRootConsole(settings);
+            //Create map sub-window
+            _mapConsole = new RLConsole(_mapWidth, _mapHeight);
+
+            //Create dungeon
+            DungeonMap = new DungeonMap();
 
             //Setup update and render methods
             _rootConsole.Update += OnRootConsoleUpdate;
@@ -32,11 +49,14 @@ namespace RogueLike
 
         private static void OnRootConsoleUpdate(object sender, UpdateEventArgs e)
         {
-            _rootConsole.Print(110, 80, "Hello World!", RLColor.White);
+            _mapConsole.Print(1, 1, "Hello World! Welcome in my game!", RLColor.White);
+            _mapConsole.Print(0, 0, DungeonMap.ToString(), RLColor.White);
         }
 
         private static void OnRootConsoleRender(object sender, UpdateEventArgs e)
         {
+            RLConsole.Blit(_mapConsole, 0, 0, _mapWidth, _mapHeight, _rootConsole, _mapPositionX, _mapPositionY);
+
             _rootConsole.Draw();
         }
     }
